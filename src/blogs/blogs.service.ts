@@ -1,26 +1,68 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
+import { Blog } from './entities/blog.entity';
+import { BlogsRepository } from './blogs.repository';
+import { BlogNotFoundServiceError, BlogRepositoryError } from './blogs.errors';
+import { GetBlogDto } from './dto/get-blog.dto';
+
+// We only need one account for the time being
+const USER_ID = '37a1552d-cb44-4962-8843-38517ef8073f';
 
 @Injectable()
 export class BlogsService {
-  create(createBlogDto: CreateBlogDto) {
-    return 'This action adds a new blog';
+  constructor(private repo: BlogsRepository) {}
+
+  async create(createBlogDto: CreateBlogDto): Promise<GetBlogDto> {
+    try {
+      const newBlog = await this.repo.createBlog(createBlogDto, USER_ID);
+      return this.mapToDto(newBlog);
+    } catch (error) {
+      // log database error
+      throw error;
+    }
   }
 
-  findAll() {
-    return `This action returns all blogs`;
+  async getAll(): Promise<GetBlogDto[]> {
+    const blogs = await this.repo.getBlogs();
+    return blogs.map(this.mapToDto);
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} blog`;
+  async get(id: string): Promise<GetBlogDto> {
+    try {
+      const entity = await this.repo.getBlog(id);
+      return this.mapToDto(entity);
+    } catch (error: unknown) {
+      if (error instanceof BlogRepositoryError) {
+        if (error.code === 'blog_not_found') {
+          throw new BlogNotFoundServiceError();
+        }
+      }
+
+      throw error;
+    }
   }
 
-  update(id: string, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog`;
+  async update(id: string, updateBlogDto: Partial<Blog>): Promise<void> {
+    const blog = await this.get(id);
+    await this.repo.updateBlog(blog.id, updateBlogDto);
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} blog`;
+  async remove(id: string): Promise<void> {
+    try {
+      await this.repo.removeBlog(id);
+    } catch (error) {
+      if (error instanceof BlogRepositoryError) {
+        if (error.code === 'blog_not_found') {
+          throw new BlogNotFoundServiceError();
+        }
+      }
+      throw error;
+    }
+  }
+
+  private mapToDto(entity: Blog): GetBlogDto {
+    return {
+      ...entity,
+    };
   }
 }

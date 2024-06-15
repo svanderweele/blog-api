@@ -1,0 +1,13 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: simon
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: blogs_api
+    ports:
+      - "5432:5432"
