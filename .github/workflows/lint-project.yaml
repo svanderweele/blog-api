@@ -14,13 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        # The linter won't run on submodules
-        # with:
-        #   submodules: recursive
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
           cache: 'yarn'
       - run: yarn install --frozen-lockfile
       - name: Run lint-staged
-        run: yarn lint-staged --diff="${GITHUB_BASE_REF}...${GITHUB_HEAD_REF}"
+        run: yarn lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
         id: lint
