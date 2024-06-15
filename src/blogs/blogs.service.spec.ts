@@ -17,7 +17,7 @@ const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(),
-    description: faker.word.words({ count: 50 }),
+    content: faker.word.words({ count: 50 }),
     authorId: faker.string.uuid(),
     image: null,
     deletedAt: null,
@@ -45,7 +45,7 @@ describe('BlogService', () => {
       const createdEntity = await sut.create(createDto);
       expect(createdEntity.id).toBeDefined();
       expect(createdEntity.title).toBe(createDto.title);
-      expect(createdEntity.description).toBe(createDto.description);
+      expect(createdEntity.content).toBe(createDto.content);
       expect(createdEntity.deletedAt).toBeNull();
       expect(createdEntity.image).toBeNull();
     });

@@ -5,5 +5,5 @@ export class CreateBlogDto {
   title: string;
 
   @IsString()
-  description: string;
+  content: string;
 }

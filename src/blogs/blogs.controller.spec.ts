@@ -13,7 +13,7 @@ const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(),
-    description: faker.word.words({ count: 50 }),
+    content: faker.word.words({ count: 50 }),
     authorId: faker.string.uuid(),
     image: null,
     deletedAt: null,
@@ -72,7 +72,7 @@ describe('BlogsController', () => {
       const blogs: Blog[] = [
         {
           id: 'some-id',
-          description: 'test-description',
+          content: 'test-description',
           authorId: 'some-id',
           title: 'some-title',
           image: null,

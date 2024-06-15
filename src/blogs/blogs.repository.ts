@@ -28,11 +28,11 @@ export class BlogsRepository {
     return this.repo.find({ withDeleted: true });
   }
 
-  async getBlog(id: string): Promise<Blog> {
+  async getBlog(id: string, includeDeleted: boolean = true): Promise<Blog> {
     try {
       return await this.repo.findOneOrFail({
         where: { id },
-        withDeleted: true,
+        withDeleted: includeDeleted,
       });
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
@@ -54,7 +54,7 @@ export class BlogsRepository {
   }
 
   async removeBlog(id: string): Promise<void> {
-    await this.getBlog(id);
+    await this.getBlog(id, false);
     await this.repo.softDelete(id);
   }
 }

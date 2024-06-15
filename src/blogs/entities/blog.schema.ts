@@ -13,7 +13,7 @@ export const BlogSchema = new EntitySchema<Blog>({
     title: {
       type: 'text',
     },
-    description: {
+    content: {
       type: 'text',
     },
     image: {
