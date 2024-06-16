@@ -4,10 +4,15 @@ import { BlogsController } from './blogs.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BlogSchema } from './entities/blog.schema';
 import { BlogsRepository } from './blogs.repository';
+import { INTERFACE_TOKEN_BLOG_REPOSITORY } from './interfaces/blogs.interface.repository';
+import { INTERFACE_TOKEN_BLOG_SERVICE } from './interfaces/blogs.interface.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BlogSchema])],
   controllers: [BlogsController],
-  providers: [BlogsService, BlogsRepository],
+  providers: [
+    { provide: INTERFACE_TOKEN_BLOG_SERVICE, useClass: BlogsService },
+    { provide: INTERFACE_TOKEN_BLOG_REPOSITORY, useClass: BlogsRepository },
+  ],
 })
 export class BlogsModule {}

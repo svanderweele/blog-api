@@ -1,60 +1,77 @@
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
-import { Injectable } from '@nestjs/common';
-import { CreateBlogDto } from './dto/create-blog.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BlogNotFoundRepositoryError } from './blogs.errors';
+import { IBlogRepository } from './interfaces/blogs.interface.repository';
 
 @Injectable()
-export class BlogsRepository {
+export class BlogsRepository implements IBlogRepository {
   constructor(@InjectRepository(Blog) private repo: Repository<Blog>) {}
 
-  async createBlog(
-    createBlogDto: CreateBlogDto,
-    _authorId: string,
-  ): Promise<Blog> {
-    const entity = this.repo.create(createBlogDto);
-
+  async create(dto: {
+    title: string;
+    content: string;
+    authorId: string;
+  }): Promise<Blog> {
     try {
+      const entity = this.repo.create({
+        title: dto.title,
+        content: dto.content,
+        authorId: dto.authorId,
+      });
       await this.repo.insert(entity);
-      return entity;
+      return this.repo.findOneOrFail({ where: { id: entity.id } });
     } catch (error) {
-      // log database error
       throw error;
     }
   }
 
-  getBlogs(): Promise<Blog[]> {
-    return this.repo.find({ withDeleted: true });
+  async update(
+    id: string,
+    dto: { title?: string; content?: string; image?: string },
+  ): Promise<Blog> {
+    try {
+      await this.repo.update(id, dto);
+      return this.repo.findOneOrFail({ where: { id: id } });
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        throw new NotFoundException();
+      }
+
+      throw error;
+    }
   }
 
-  async getBlog(id: string, includeDeleted: boolean = true): Promise<Blog> {
+  async getAll(): Promise<Blog[]> {
+    try {
+      return await this.repo.find({ withDeleted: true });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async get(id: string): Promise<Blog> {
     try {
       return await this.repo.findOneOrFail({
         where: { id },
-        withDeleted: includeDeleted,
       });
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
-        throw new BlogNotFoundRepositoryError();
+        throw new NotFoundException();
       }
       throw error;
     }
   }
 
-  async updateBlog(id: string, updateBlogDto: Partial<Blog>): Promise<void> {
+  async softDelete(id: string): Promise<void> {
     try {
-      await this.repo.update(id, updateBlogDto);
+      await this.repo.findOneOrFail({ where: { id } });
+      await this.repo.softDelete(id);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
-        throw new BlogNotFoundRepositoryError();
+        throw new NotFoundException();
       }
       throw error;
     }
-  }
-
-  async removeBlog(id: string): Promise<void> {
-    await this.getBlog(id, false);
-    await this.repo.softDelete(id);
   }
 }

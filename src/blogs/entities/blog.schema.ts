@@ -24,5 +24,12 @@ export const BlogSchema = new EntitySchema<Blog>({
       type: 'date',
       deleteDate: true,
     },
+    authorId: {
+      type: 'uuid',
+    },
+  },
+  relations: {
+    // TODO: Map relation to Author
+    // authorId: {},
   },
 });

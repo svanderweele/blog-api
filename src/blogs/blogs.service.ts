@@ -1,68 +1,78 @@
-import { Injectable } from '@nestjs/common';
-import { CreateBlogDto } from './dto/create-blog.dto';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  StreamableFile,
+} from '@nestjs/common';
 import { Blog } from './entities/blog.entity';
-import { BlogsRepository } from './blogs.repository';
-import { BlogNotFoundServiceError, BlogRepositoryError } from './blogs.errors';
-import { GetBlogDto } from './dto/get-blog.dto';
-
-// We only need one account for the time being
-const USER_ID = '37a1552d-cb44-4962-8843-38517ef8073f';
+import {
+  IBlogRepository,
+  INTERFACE_TOKEN_BLOG_REPOSITORY,
+} from './interfaces/blogs.interface.repository';
+import { IBlogService } from './interfaces/blogs.interface.service';
+import { createReadStream } from 'fs';
+import { join } from 'path';
 
 @Injectable()
-export class BlogsService {
-  constructor(private repo: BlogsRepository) {}
+export class BlogsService implements IBlogService {
+  constructor(
+    @Inject(INTERFACE_TOKEN_BLOG_REPOSITORY) private repo: IBlogRepository,
+  ) {}
 
-  async create(createBlogDto: CreateBlogDto): Promise<GetBlogDto> {
-    try {
-      const newBlog = await this.repo.createBlog(createBlogDto, USER_ID);
-      return this.mapToDto(newBlog);
-    } catch (error) {
-      // log database error
-      throw error;
-    }
+  async getAll(): Promise<Blog[]> {
+    const blogs = await this.repo.getAll();
+    return blogs;
   }
 
-  async getAll(): Promise<GetBlogDto[]> {
-    const blogs = await this.repo.getBlogs();
-    return blogs.map(this.mapToDto);
+  async get(id: string): Promise<Blog> {
+    return await this.repo.get(id);
   }
 
-  async get(id: string): Promise<GetBlogDto> {
+  async create(dto: {
+    title: string;
+    content: string;
+    authorId: string;
+  }): Promise<Blog> {
+    return await this.repo.create({
+      title: dto.title,
+      content: dto.content,
+      authorId: dto.authorId,
+    });
+  }
+
+  async update(
+    id: string,
+    dto: {
+      title?: string;
+      content?: string;
+      image?: string;
+    },
+  ): Promise<Blog> {
+    return await this.repo.update(id, {
+      title: dto.title,
+      content: dto.content,
+      image: dto.image,
+    });
+  }
+
+  async softDelete(id: string): Promise<void> {
+    await this.repo.softDelete(id);
+  }
+
+  async getImage(id: string): Promise<StreamableFile> {
     try {
-      const entity = await this.repo.getBlog(id);
-      return this.mapToDto(entity);
-    } catch (error: unknown) {
-      if (error instanceof BlogRepositoryError) {
-        if (error.code === 'blog_not_found') {
-          throw new BlogNotFoundServiceError();
-        }
+      const blog = await this.repo.get(id);
+      if (!blog.image) {
+        //TODO: Log that image was not found
+        throw new NotFoundException();
       }
 
-      throw error;
-    }
-  }
-
-  async update(id: string, updateBlogDto: Partial<Blog>): Promise<void> {
-    const blog = await this.get(id);
-    await this.repo.updateBlog(blog.id, updateBlogDto);
-  }
-
-  async remove(id: string): Promise<void> {
-    try {
-      await this.repo.removeBlog(id);
+      const filePath = join(process.cwd(), 'client', blog.image);
+      const file = createReadStream(filePath);
+      return new StreamableFile(file);
     } catch (error) {
-      if (error instanceof BlogRepositoryError) {
-        if (error.code === 'blog_not_found') {
-          throw new BlogNotFoundServiceError();
-        }
-      }
+      //TODO: Log errors
       throw error;
     }
-  }
-
-  private mapToDto(entity: Blog): GetBlogDto {
-    return {
-      ...entity,
-    };
   }
 }
