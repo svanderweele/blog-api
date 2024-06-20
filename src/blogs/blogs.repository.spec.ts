@@ -130,7 +130,7 @@ describe('BlogRepository', () => {
       );
 
       // Act
-      const call = () => sut.softDelete(faker.string.uuid());
+      const call = () => sut.softDelete(createRandomBlogEntity());
 
       // Assert
       await expect(call()).rejects.toThrow(NotFoundException);
