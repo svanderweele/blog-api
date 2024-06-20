@@ -11,7 +11,7 @@ export interface IBlogRepository {
   create(dto: {
     title: string;
     content: string;
-    authorId: string;
+    userId: string;
   }): Promise<Blog>;
 
   /**
@@ -50,5 +50,5 @@ export interface IBlogRepository {
    * @throws BlogNotFoundRepositoryError if no blog is found
    * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
-  softDelete(id: string): Promise<void>;
+  softDelete(blog: Blog): Promise<void>;
 }

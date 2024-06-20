@@ -12,7 +12,7 @@ export interface IBlogService {
   create(dto: {
     title: string;
     content: string;
-    authorId: string;
+    userId: string;
   }): Promise<Blog>;
 
   /**
@@ -23,7 +23,7 @@ export interface IBlogService {
    * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   update(
-    id: string,
+    blog: Blog,
     dto: { title?: string; content?: string; image?: string },
   ): Promise<Blog>;
 
@@ -35,7 +35,7 @@ export interface IBlogService {
    */
   get(id: string): Promise<Blog>;
 
-  getImage(id: string): Promise<StreamableFile>;
+  getImage(blog: Blog): Promise<StreamableFile>;
   /**
    * Gets all blogs
    * @throws BlogUnexpectedServiceError if an unexpected error occurs
@@ -48,5 +48,5 @@ export interface IBlogService {
    * @throws BlogNotFoundServiceError if no blog is found
    * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
-  softDelete(id: string): Promise<void>;
+  softDelete(blog: Blog): Promise<void>;
 }

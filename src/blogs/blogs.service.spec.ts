@@ -13,7 +13,7 @@ const createRandomBlogEntity = (): Blog => {
     id: faker.string.uuid(),
     title: faker.word.words(5),
     content: faker.word.words(50),
-    authorId: faker.string.uuid(),
+    userId: faker.string.uuid(),
     image: null,
     deletedAt: null,
   };
@@ -44,7 +44,7 @@ describe('BlogService', () => {
       const createdEntity = await sut.create({
         title: entity.title,
         content: entity.content,
-        authorId: entity.authorId,
+        userId: entity.userId,
       });
 
       // Assert
@@ -53,6 +53,55 @@ describe('BlogService', () => {
       expect(createdEntity.content).toBe(entity.content);
       expect(createdEntity.deletedAt).toBeNull();
       expect(createdEntity.image).toBeNull();
+    });
+
+    it('should throw an error when title is empty', async () => {
+      // Arrange
+      const payload = {
+        title: '',
+        content: 'some content',
+        userId: 'some-id',
+      };
+
+      // Act
+      const call = async () => {
+        return await sut.create(payload);
+      };
+
+      // Assert
+      await expect(call()).rejects.toThrow('title cannot be empty');
+    });
+    it('should throw an error when content is empty', async () => {
+      // Arrange
+      const payload = {
+        title: 'some title',
+        content: '',
+        userId: 'some-id',
+      };
+
+      // Act
+      const call = async () => {
+        return await sut.create(payload);
+      };
+
+      // Assert
+      await expect(call()).rejects.toThrow('content cannot be empty');
+    });
+    it('should throw an error when user id is empty', async () => {
+      // Arrange
+      const payload = {
+        title: 'some title',
+        content: 'some content',
+        userId: '',
+      };
+
+      // Act
+      const call = async () => {
+        return await sut.create(payload);
+      };
+
+      // Assert
+      await expect(call()).rejects.toThrow('user id cannot be empty');
     });
   });
   describe('getting all blogs', () => {

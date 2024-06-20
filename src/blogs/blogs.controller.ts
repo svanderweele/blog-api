@@ -40,7 +40,7 @@ export class BlogsController {
     return await this.blogsService.create({
       title: dto.title,
       content: dto.content,
-      authorId: USER_UUID,
+      userId: USER_UUID,
     });
   }
 
@@ -71,19 +71,30 @@ export class BlogsController {
     file: Express.Multer.File,
   ) {
     const path = file.filename;
-    await this.blogsService.update(blogId, {
+
+    const blog = await this.blogsService.get(blogId);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+
+    await this.blogsService.update(blog, {
       image: path,
     });
   }
 
   @Patch(':id')
   async update(
-    @Param() idDto: IdDto,
-    @Body() dto: UpdateBlogDto,
+    @Param() dto: IdDto,
+    @Body() body: UpdateBlogDto,
   ): Promise<Blog> {
-    return await this.blogsService.update(idDto.id, {
-      title: dto.title,
-      content: dto.content,
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+
+    return await this.blogsService.update(blog, {
+      title: body.title,
+      content: body.content,
     });
   }
 
@@ -105,11 +116,21 @@ export class BlogsController {
 
   @Get(':id/image')
   async getImage(@Param() dto: IdDto) {
-    return this.blogsService.getImage(dto.id);
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+
+    return this.blogsService.getImage(blog);
   }
 
   @Delete(':id')
   async delete(@Param() dto: IdDto) {
-    return this.blogsService.softDelete(dto.id);
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+
+    return this.blogsService.softDelete(blog);
   }
 }

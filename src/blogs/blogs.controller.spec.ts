@@ -12,7 +12,7 @@ const createRandomBlogEntity = (): Blog => {
     id: faker.string.uuid(),
     title: faker.word.words(),
     content: faker.word.words({ count: 50 }),
-    authorId: faker.string.uuid(),
+    userId: faker.string.uuid(),
     image: null,
     deletedAt: null,
   };
@@ -99,8 +99,10 @@ describe('BlogsController', () => {
 
     it('should return image', async () => {
       // Arrange
+      const blog = createRandomBlogEntity();
+      service.get.mockResolvedValue(blog);
       const image: any = {};
-      service.getImage.mockResolvedValue(Promise.resolve(image));
+      service.getImage.mockResolvedValue(image);
       // Act
       const call = async () => {
         return await sut.getImage({ id: faker.string.uuid() });
@@ -128,7 +130,7 @@ describe('BlogsController', () => {
         {
           id: 'some-id',
           content: 'test-description',
-          authorId: 'some-id',
+          userId: 'some-id',
           title: 'some-title',
           image: null,
           deletedAt: null,

@@ -24,46 +24,54 @@ export class BlogsService implements IBlogService {
     return blogs;
   }
 
-  async get(id: string): Promise<Blog> {
+  async get(id: string): Promise<Blog | null> {
     return await this.repo.get(id);
   }
 
   async create(dto: {
     title: string;
     content: string;
-    authorId: string;
+    userId: string;
   }): Promise<Blog> {
+    if (!dto.title) {
+      throw new Error('title cannot be empty');
+    }
+    if (!dto.content) {
+      throw new Error('content cannot be empty');
+    }
+    if (!dto.userId) {
+      throw new Error('user id cannot be empty');
+    }
+
     return await this.repo.create({
       title: dto.title,
       content: dto.content,
-      authorId: dto.authorId,
+      userId: dto.userId,
     });
   }
 
   async update(
-    id: string,
+    blog: Blog,
     dto: {
       title?: string;
       content?: string;
       image?: string;
     },
   ): Promise<Blog> {
-    return await this.repo.update(id, {
+    return await this.repo.update(blog.id, {
       title: dto.title,
       content: dto.content,
       image: dto.image,
     });
   }
 
-  async softDelete(id: string): Promise<void> {
-    await this.repo.softDelete(id);
+  async softDelete(blog: Blog): Promise<void> {
+    await this.repo.softDelete(blog);
   }
 
-  async getImage(id: string): Promise<StreamableFile> {
+  async getImage(blog: Blog): Promise<StreamableFile> {
     try {
-      const blog = await this.repo.get(id);
       if (!blog.image) {
-        //TODO: Log that image was not found
         throw new NotFoundException();
       }
 

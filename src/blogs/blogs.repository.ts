@@ -11,13 +11,13 @@ export class BlogsRepository implements IBlogRepository {
   async create(dto: {
     title: string;
     content: string;
-    authorId: string;
+    userId: string;
   }): Promise<Blog> {
     try {
       const entity = this.repo.create({
         title: dto.title,
         content: dto.content,
-        authorId: dto.authorId,
+        userId: dto.userId,
       });
       await this.repo.insert(entity);
       return this.repo.findOneOrFail({ where: { id: entity.id } });
@@ -50,23 +50,19 @@ export class BlogsRepository implements IBlogRepository {
     }
   }
 
-  async get(id: string): Promise<Blog> {
+  async get(id: string): Promise<Blog | null> {
     try {
-      return await this.repo.findOneOrFail({
+      return await this.repo.findOne({
         where: { id },
       });
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        throw new NotFoundException();
-      }
       throw error;
     }
   }
 
-  async softDelete(id: string): Promise<void> {
+  async softDelete(blog: Blog): Promise<void> {
     try {
-      await this.repo.findOneOrFail({ where: { id } });
-      await this.repo.softDelete(id);
+      await this.repo.softDelete(blog.id);
     } catch (error) {
       if (error instanceof EntityNotFoundError) {
         throw new NotFoundException();

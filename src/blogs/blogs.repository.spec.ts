@@ -11,7 +11,7 @@ const createRandomBlogEntity = (): Blog => {
     id: faker.string.uuid(),
     title: faker.word.words(),
     content: faker.word.words({ count: 50 }),
-    authorId: faker.string.uuid(),
+    userId: faker.string.uuid(),
     image: null,
     deletedAt: null,
   };
@@ -45,7 +45,7 @@ describe('BlogRepository', () => {
     it('should get a blog', async () => {
       // Arrange
       const entity = createRandomBlogEntity();
-      repository.findOneOrFail.mockResolvedValue(entity);
+      repository.findOne.mockResolvedValue(entity);
 
       // Act
       const call = () => sut.get(entity.id);
@@ -54,17 +54,15 @@ describe('BlogRepository', () => {
       await expect(call()).resolves.toBe(entity);
     });
 
-    it('should throw not found error as not found repository error', async () => {
+    it('if entity is not found it should return null', async () => {
       // Arrange
-      repository.findOneOrFail.mockRejectedValue(
-        new EntityNotFoundError(Blog, 'Mock Error'),
-      );
+      repository.findOne.mockResolvedValue(null);
 
       // Act
       const call = () => sut.get(faker.string.uuid());
 
       // Assert
-      await expect(call()).rejects.toThrow(NotFoundException);
+      await expect(call()).resolves.toBeNull();
     });
   });
 
@@ -82,7 +80,7 @@ describe('BlogRepository', () => {
         sut.create({
           title: faker.word.words(5),
           content: faker.word.words(50),
-          authorId: faker.string.uuid(),
+          userId: faker.string.uuid(),
         });
 
       // Assert
