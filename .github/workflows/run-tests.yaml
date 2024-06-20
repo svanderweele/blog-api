@@ -18,8 +18,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-node@v3
         with:
-          cache: 'yarn'
-      - run: yarn install --frozen-lockfile
+          cache: 'npm'
+      - run: npm ci
       - name: Run unit tests
-        run: yarn test
+        run: npm test
         id: test
