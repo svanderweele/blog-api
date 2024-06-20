@@ -11,9 +11,15 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { VersionMiddleware } from './common/middleware/version.middleware';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../..', 'client'),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -32,6 +38,7 @@ import { AuthModule } from './auth/auth.module';
     CommonModule,
     UserModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

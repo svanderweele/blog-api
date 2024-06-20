@@ -10,6 +10,7 @@ const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(),
+    subtitle: faker.word.words(),
     content: faker.word.words({ count: 50 }),
     userId: faker.string.uuid(),
     image: null,
@@ -83,6 +84,7 @@ describe('BlogRepository', () => {
       const call = () =>
         sut.create({
           title: faker.word.words(5),
+          subtitle: faker.word.words(),
           content: faker.word.words(50),
           userId: faker.string.uuid(),
         });

@@ -11,6 +11,7 @@ const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(),
+    subtitle: faker.word.words(),
     content: faker.word.words({ count: 50 }),
     userId: faker.string.uuid(),
     image: null,
@@ -47,6 +48,7 @@ describe('BlogsController', () => {
       const call = async () => {
         return await sut.create(request, {
           title: entity.title,
+          subtitle: entity.subtitle,
           content: entity.content,
         });
       };
@@ -61,6 +63,7 @@ describe('BlogsController', () => {
       const call = async () => {
         return await sut.create(request, {
           title: entity.title,
+          subtitle: entity.subtitle,
           content: entity.content,
         });
       };
@@ -137,6 +140,7 @@ describe('BlogsController', () => {
       const blogs: Blog[] = [
         {
           id: 'some-id',
+          subtitle: 'subtitle',
           content: 'test-description',
           userId: 'some-id',
           title: 'some-title',

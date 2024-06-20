@@ -12,6 +12,7 @@ const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(5),
+    subtitle: faker.word.words(5),
     content: faker.word.words(50),
     userId: faker.string.uuid(),
     image: null,
@@ -47,6 +48,7 @@ describe('BlogService', () => {
       // Act
       const createdEntity = await sut.create({
         title: entity.title,
+        subtitle: entity.subtitle,
         content: entity.content,
         userId: entity.userId,
       });
@@ -63,6 +65,7 @@ describe('BlogService', () => {
       // Arrange
       const payload = {
         title: '',
+        subtitle: 'some content',
         content: 'some content',
         userId: 'some-id',
       };
@@ -75,10 +78,28 @@ describe('BlogService', () => {
       // Assert
       await expect(call()).rejects.toThrow('title cannot be empty');
     });
+    it('should throw an error when subtitle is empty', async () => {
+      // Arrange
+      const payload = {
+        title: 'some title',
+        subtitle: '',
+        content: '',
+        userId: 'some-id',
+      };
+
+      // Act
+      const call = async () => {
+        return await sut.create(payload);
+      };
+
+      // Assert
+      await expect(call()).rejects.toThrow('subtitle cannot be empty');
+    });
     it('should throw an error when content is empty', async () => {
       // Arrange
       const payload = {
         title: 'some title',
+        subtitle: 'some content',
         content: '',
         userId: 'some-id',
       };
@@ -95,6 +116,7 @@ describe('BlogService', () => {
       // Arrange
       const payload = {
         title: 'some title',
+        subtitle: 'subtitle',
         content: 'some content',
         userId: '',
       };
