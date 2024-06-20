@@ -153,7 +153,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        await sut.update(faker.string.uuid(), {
+        await sut.update(createRandomBlogEntity(), {
           title: faker.word.words(5),
           content: faker.word.words(50),
         });
@@ -170,7 +170,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        await sut.softDelete(faker.string.uuid());
+        await sut.softDelete(createRandomBlogEntity());
       };
 
       // Assert
@@ -185,7 +185,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        await sut.getImage(faker.string.uuid());
+        await sut.getImage(createRandomBlogEntity());
       };
 
       // Assert
@@ -199,7 +199,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        await sut.getImage(faker.string.uuid());
+        await sut.getImage(entity);
       };
 
       // Assert
