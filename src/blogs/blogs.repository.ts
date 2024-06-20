@@ -64,9 +64,9 @@ export class BlogsRepository implements IBlogRepository {
     }
   }
 
-  async getAll(): Promise<Blog[]> {
+  async getAll(userId: string): Promise<Blog[]> {
     try {
-      return await this.repo.find({ withDeleted: true });
+      return await this.repo.find({ where: { userId }, withDeleted: true });
     } catch (error) {
       this.logger.error(
         '[blogs.repository.getAll] Failed to get all blogs',
@@ -76,10 +76,10 @@ export class BlogsRepository implements IBlogRepository {
     }
   }
 
-  async get(id: string): Promise<Blog | null> {
+  async get(id: string, userId: string): Promise<Blog | null> {
     try {
       return await this.repo.findOne({
-        where: { id },
+        where: { id, userId },
       });
     } catch (error) {
       this.logger.error(

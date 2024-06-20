@@ -24,15 +24,15 @@ export class BlogsService implements IBlogService {
     private readonly logger: ILogger,
   ) {}
 
-  async getAll(): Promise<Blog[]> {
+  async getAll(userId: string): Promise<Blog[]> {
     this.logger.trace('[blogs.service.getAll]');
-    const blogs = await this.repo.getAll();
+    const blogs = await this.repo.getAll(userId);
     return blogs;
   }
 
-  async get(id: string): Promise<Blog | null> {
+  async get(id: string, userId: string): Promise<Blog | null> {
     this.logger.trace('[blogs.service.get]', id);
-    return await this.repo.get(id);
+    return await this.repo.get(id, userId);
   }
 
   async create(dto: {

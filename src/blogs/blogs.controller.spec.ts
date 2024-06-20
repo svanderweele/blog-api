@@ -18,6 +18,10 @@ const createRandomBlogEntity = (): Blog => {
   };
 };
 
+const request: any = {
+  user: { sub: 'user', username: 'username' },
+};
+
 describe('BlogsController', () => {
   let sut: BlogsController;
   let service: jest.Mocked<BlogsService>;
@@ -41,7 +45,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.create({
+        return await sut.create(request, {
           title: entity.title,
           content: entity.content,
         });
@@ -55,7 +59,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.create({
+        return await sut.create(request, {
           title: entity.title,
           content: entity.content,
         });
@@ -74,7 +78,11 @@ describe('BlogsController', () => {
       // Act
       const call = async () => {
         const file: any = {};
-        return await sut.uploadImage({ id: faker.string.uuid() }, file);
+        return await sut.uploadImage(
+          request,
+          { id: faker.string.uuid() },
+          file,
+        );
       };
 
       // Assert
@@ -90,7 +98,7 @@ describe('BlogsController', () => {
 
         // Act
         const call = async () => {
-          return await sut.getImage({ id: faker.string.uuid() });
+          return await sut.getImage(request, { id: faker.string.uuid() });
         };
 
         // Assert
@@ -105,7 +113,7 @@ describe('BlogsController', () => {
       service.getImage.mockResolvedValue(image);
       // Act
       const call = async () => {
-        return await sut.getImage({ id: faker.string.uuid() });
+        return await sut.getImage(request, { id: faker.string.uuid() });
       };
       // Assert
       await expect(call()).resolves.toStrictEqual(image);
@@ -119,7 +127,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.getAll();
+        return await sut.getAll(request);
       };
       // Assert
       await expect(call()).rejects.toThrow(NotFoundException);
@@ -139,7 +147,7 @@ describe('BlogsController', () => {
       service.getAll.mockResolvedValue(Promise.resolve(blogs));
       // Act
       const call = async () => {
-        return await sut.getAll();
+        return await sut.getAll(request);
       };
       // Assert
       await expect(call()).resolves.toBe(blogs);
@@ -150,7 +158,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.getAll();
+        return await sut.getAll(request);
       };
 
       // Assert
@@ -166,7 +174,7 @@ describe('BlogsController', () => {
 
         // Act
         const call = async () => {
-          return await sut.get({ id: faker.string.uuid() });
+          return await sut.get(request, { id: faker.string.uuid() });
         };
 
         // Assert
@@ -179,7 +187,7 @@ describe('BlogsController', () => {
       service.get.mockResolvedValue(Promise.resolve(blog));
       // Act
       const call = async () => {
-        return await sut.get({ id: faker.string.uuid() });
+        return await sut.get(request, { id: faker.string.uuid() });
       };
       // Assert
       await expect(call()).resolves.toStrictEqual(blog);
@@ -190,7 +198,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.get({ id: faker.string.uuid() });
+        return await sut.get(request, { id: faker.string.uuid() });
       };
 
       // Assert
@@ -206,6 +214,7 @@ describe('BlogsController', () => {
       // Act
       const call = async () => {
         return await sut.update(
+          request,
           { id: faker.string.uuid() },
           { title: faker.word.words(5), content: faker.word.words(50) },
         );
@@ -223,7 +232,7 @@ describe('BlogsController', () => {
 
       // Act
       const call = async () => {
-        return await sut.delete({ id: faker.string.uuid() });
+        return await sut.delete(request, { id: faker.string.uuid() });
       };
 
       // Assert

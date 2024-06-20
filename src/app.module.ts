@@ -9,6 +9,8 @@ import { WinstonModule } from 'nest-winston';
 import { loggerOptions } from './common/logger/logger.config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { VersionMiddleware } from './common/middleware/version.middleware';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { VersionMiddleware } from './common/middleware/version.middleware';
     }),
     BlogsModule,
     CommonModule,
+    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

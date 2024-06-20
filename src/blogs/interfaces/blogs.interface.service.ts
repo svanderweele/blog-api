@@ -27,18 +27,24 @@ export interface IBlogService {
   /**
    * Gets a blog by the id provided
    * @param id the id of the blog
+   * @param userId the user's id
    */
-  get(id: string): Promise<Blog>;
+  get(id: string, userId: string): Promise<Blog>;
 
+  /**
+   * Gets the image of a blog
+   * @param blog the blog
+   */
   getImage(blog: Blog): Promise<StreamableFile>;
   /**
    * Gets all blogs
+   * @param userId the user's id
    */
-  getAll(): Promise<Blog[]>;
+  getAll(userId: string): Promise<Blog[]>;
 
   /**
    * Soft deletes a blog
-   * @param id the id of the blog
+   * @param blog the blog
    */
   softDelete(blog: Blog): Promise<void>;
 }

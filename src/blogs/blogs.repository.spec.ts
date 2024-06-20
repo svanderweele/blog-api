@@ -17,6 +17,10 @@ const createRandomBlogEntity = (): Blog => {
   };
 };
 
+const request: any = {
+  user: { sub: 'user', username: 'username' },
+};
+
 describe('BlogRepository', () => {
   let sut: BlogsRepository;
   let repository: jest.Mocked<Repository<Blog>>;
@@ -34,7 +38,7 @@ describe('BlogRepository', () => {
       repository.find.mockResolvedValue(blogs);
 
       // Act
-      const call = () => sut.getAll();
+      const call = () => sut.getAll(request);
 
       // Assert
       await expect(call()).resolves.toBe(blogs);
@@ -48,7 +52,7 @@ describe('BlogRepository', () => {
       repository.findOne.mockResolvedValue(entity);
 
       // Act
-      const call = () => sut.get(entity.id);
+      const call = () => sut.get(request, entity.id);
 
       // Assert
       await expect(call()).resolves.toBe(entity);
@@ -59,7 +63,7 @@ describe('BlogRepository', () => {
       repository.findOne.mockResolvedValue(null);
 
       // Act
-      const call = () => sut.get(faker.string.uuid());
+      const call = () => sut.get(request, faker.string.uuid());
 
       // Assert
       await expect(call()).resolves.toBeNull();
