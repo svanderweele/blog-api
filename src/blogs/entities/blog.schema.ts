@@ -13,7 +13,7 @@ export const BlogSchema = new EntitySchema<Blog>({
     title: {
       type: 'text',
     },
-    description: {
+    content: {
       type: 'text',
     },
     image: {
@@ -24,5 +24,12 @@ export const BlogSchema = new EntitySchema<Blog>({
       type: 'date',
       deleteDate: true,
     },
+    userId: {
+      type: 'uuid',
+    },
+  },
+  relations: {
+    // TODO: Map relation to Author
+    // userId: {},
   },
 });

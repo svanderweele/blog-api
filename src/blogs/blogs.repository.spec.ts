@@ -1,21 +1,17 @@
-// noinspection DuplicatedCode
-
 import { TestBed } from '@automock/jest';
 import { BlogsRepository } from './blogs.repository';
-import { BlogNotFoundRepositoryError } from './blogs.errors';
 import { faker } from '@faker-js/faker';
 import { Blog } from './entities/blog.entity';
-import { CreateBlogDto } from './dto/create-blog.dto';
-import { UpdateBlogDto } from './dto/update-blog.dto';
 import { EntityNotFoundError, Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { NotFoundException } from '@nestjs/common';
 
 const createRandomBlogEntity = (): Blog => {
   return {
     id: faker.string.uuid(),
     title: faker.word.words(),
-    description: faker.word.words({ count: 50 }),
-    authorId: faker.string.uuid(),
+    content: faker.word.words({ count: 50 }),
+    userId: faker.string.uuid(),
     image: null,
     deletedAt: null,
   };
@@ -31,93 +27,113 @@ describe('BlogRepository', () => {
     repository = unitRef.get(getRepositoryToken(Blog) as string);
   });
 
-  describe('create blog', () => {
-    const entity = createRandomBlogEntity();
+  describe('getting all blogs', () => {
+    it('should get blogs', async () => {
+      // Arrange
+      const blogs = [createRandomBlogEntity(), createRandomBlogEntity()];
+      repository.find.mockResolvedValue(blogs);
 
-    it('should create blog', async () => {
+      // Act
+      const call = () => sut.getAll();
+
+      // Assert
+      await expect(call()).resolves.toBe(blogs);
+    });
+  });
+
+  describe('getting blog by id', () => {
+    it('should get a blog', async () => {
+      // Arrange
+      const entity = createRandomBlogEntity();
+      repository.findOne.mockResolvedValue(entity);
+
+      // Act
+      const call = () => sut.get(entity.id);
+
+      // Assert
+      await expect(call()).resolves.toBe(entity);
+    });
+
+    it('if entity is not found it should return null', async () => {
+      // Arrange
+      repository.findOne.mockResolvedValue(null);
+
+      // Act
+      const call = () => sut.get(faker.string.uuid());
+
+      // Assert
+      await expect(call()).resolves.toBeNull();
+    });
+  });
+
+  describe('creating a blog', () => {
+    it('should create and return', async () => {
+      // Arrange
+      const entity = createRandomBlogEntity();
       repository.create.mockImplementation(() => {
         return entity;
       });
+      repository.findOneOrFail.mockResolvedValue(entity);
 
-      const createDto: CreateBlogDto = {
-        ...entity,
-      };
-      await expect(
-        sut.createBlog(createDto, faker.string.uuid()),
-      ).resolves.toEqual(entity);
-    });
+      // Act
+      const call = () =>
+        sut.create({
+          title: faker.word.words(5),
+          content: faker.word.words(50),
+          userId: faker.string.uuid(),
+        });
 
-    it('should rethrow unexpected error', async () => {
-      const error = new Error('Something blew up');
-      repository.insert.mockRejectedValue(error);
-      const createDto: CreateBlogDto = {
-        ...entity,
-      };
-
-      await expect(
-        sut.createBlog(createDto, faker.string.uuid()),
-      ).rejects.toThrow(error);
+      // Assert
+      await expect(call()).resolves.toBe(entity);
     });
   });
 
-  describe('getting all blogs', () => {
-    it('gets all blogs', async () => {
-      const blogs = [createRandomBlogEntity(), createRandomBlogEntity()];
-      repository.find.mockResolvedValue(Promise.resolve(blogs));
-      await expect(sut.getBlogs()).resolves.toBe(blogs);
-    });
-    it('should rethrow unexpected error', async () => {
-      const error = new Error('Unexpected error');
-      repository.find.mockRejectedValue(error);
-      await expect(sut.getBlogs()).rejects.toThrow(error);
-    });
-  });
-  describe('getting blog by id', () => {
-    it('should return a blog', async () => {
-      const blogs = [createRandomBlogEntity(), createRandomBlogEntity()];
-      repository.find.mockResolvedValue(Promise.resolve(blogs));
-      await expect(sut.getBlogs()).resolves.toBe(blogs);
-    });
-    it('should rethrow unexpected error', async () => {
-      const error = new Error('Unexpected error');
-      repository.findOneOrFail.mockRejectedValue(error);
-      await expect(sut.getBlog(faker.string.uuid())).rejects.toThrow(error);
-    });
-  });
-  describe('update blog', () => {
-    const entity = createRandomBlogEntity();
+  describe('updating a blog', () => {
+    it('should update a blog and return', async () => {
+      // Arrange
+      const entity = createRandomBlogEntity();
+      repository.findOneOrFail.mockResolvedValue(entity);
 
-    it('should throw blog not found error', async () => {
-      repository.update.mockRejectedValue(new EntityNotFoundError(Blog, {}));
-      const updateDto: UpdateBlogDto = {
-        ...entity,
-      };
-      await expect(sut.updateBlog(entity.id, updateDto)).rejects.toThrow(
-        new BlogNotFoundRepositoryError(),
+      // Act
+      const call = () =>
+        sut.update(entity.id, {
+          title: faker.word.words(5),
+          content: faker.word.words(50),
+        });
+
+      // Assert
+      await expect(call()).resolves.toBe(entity);
+    });
+    it('should return a missing entity repository error', async () => {
+      // Arrange
+      repository.update.mockRejectedValue(
+        new EntityNotFoundError(Blog, 'Mock Error'),
       );
-    });
-    it('should rethrow unexpected error', async () => {
-      const error = new Error('Something blew up');
-      repository.update.mockRejectedValue(error);
-      const updateDto: UpdateBlogDto = {
-        ...entity,
-      };
-      await expect(sut.updateBlog(entity.id, updateDto)).rejects.toThrow(error);
+
+      // Act
+      const call = () =>
+        sut.update(faker.string.uuid(), {
+          title: faker.word.words(5),
+          content: faker.word.words(50),
+        });
+
+      // Assert
+      await expect(call()).rejects.toThrow(NotFoundException);
     });
   });
-  describe('remove blog', () => {
-    it('should throw blog not found error', async () => {
-      repository.findOneOrFail.mockRejectedValue(
-        new EntityNotFoundError(Blog, {}),
+
+  describe('deleting a blog', () => {
+    it('should return a missing entity repository error', async () => {
+      // Arrange
+      repository.softDelete.mockRejectedValue(
+        new EntityNotFoundError(Blog, 'Mock Error'),
       );
-      await expect(sut.removeBlog(faker.string.uuid())).rejects.toThrow(
-        new BlogNotFoundRepositoryError(),
-      );
-    });
-    it('should rethrow unexpected error', async () => {
-      const error = new Error('Unexpected error');
-      repository.softDelete.mockRejectedValue(error);
-      await expect(sut.removeBlog(faker.string.uuid())).rejects.toThrow(error);
+
+      // Act
+      const call = () => sut.softDelete(createRandomBlogEntity());
+
+      // Assert
+      await expect(call()).rejects.toThrow(NotFoundException);
     });
   });
 });

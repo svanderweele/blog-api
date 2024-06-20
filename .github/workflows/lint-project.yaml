@@ -22,5 +22,5 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Run lint-staged
-        run: npm run lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
+        run: npx lint-staged --diff="origin/${GITHUB_BASE_REF}...origin/${GITHUB_HEAD_REF}"
         id: lint

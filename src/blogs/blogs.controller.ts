@@ -5,49 +5,43 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   NotFoundException,
   Param,
   ParseFilePipeBuilder,
   Patch,
   Post,
-  StreamableFile,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { BlogsService } from './blogs.service';
+import { IdDto } from '@src/common/id.dto';
+import {
+  IBlogService,
+  INTERFACE_TOKEN_BLOG_SERVICE,
+} from './interfaces/blogs.interface.service';
+import { Blog } from './entities/blog.entity';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { join } from 'path';
-import { BlogNotFoundServiceError } from './blogs.errors';
-import { createReadStream } from 'fs';
+
+// For now the system will only support one USER
+const USER_UUID = '06cec3d1-e9b7-45bd-bb57-dc0b980c6303';
 
 @Controller('blogs')
 export class BlogsController {
-  constructor(private readonly blogsService: BlogsService) {}
+  constructor(
+    @Inject(INTERFACE_TOKEN_BLOG_SERVICE)
+    private readonly blogsService: IBlogService,
+  ) {}
 
   @Post()
-  create(@Body() createBlogDto: CreateBlogDto) {
-    try {
-      return this.blogsService.create(createBlogDto);
-    } catch (error) {
-      //log failure
-      throw error;
-    }
-  }
-
-  @Get(':id/image')
-  async getImage(@Param('id') id: string) {
-    const blog = await this.blogsService.get(id);
-
-    if (!blog.image) {
-      throw new NotFoundException('Blog image not found.');
-    }
-
-    const filePath = join(process.cwd(), 'client', blog.image);
-    const file = createReadStream(filePath);
-    return new StreamableFile(file);
+  async create(@Body() dto: CreateBlogDto): Promise<Blog> {
+    return await this.blogsService.create({
+      title: dto.title,
+      content: dto.content,
+      userId: USER_UUID,
+    });
   }
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -77,15 +71,31 @@ export class BlogsController {
     file: Express.Multer.File,
   ) {
     const path = file.filename;
-    try {
-      await this.blogsService.update(blogId, {
-        image: path,
-      });
-    } catch (error) {
-      if (error instanceof BlogNotFoundServiceError) {
-        throw new NotFoundException('Blog not found');
-      }
+
+    const blog = await this.blogsService.get(blogId);
+    if (!blog) {
+      throw new NotFoundException();
     }
+
+    await this.blogsService.update(blog, {
+      image: path,
+    });
+  }
+
+  @Patch(':id')
+  async update(
+    @Param() dto: IdDto,
+    @Body() body: UpdateBlogDto,
+  ): Promise<Blog> {
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+
+    return await this.blogsService.update(blog, {
+      title: body.title,
+      content: body.content,
+    });
   }
 
   @Get()
@@ -100,38 +110,27 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async get(@Param('id') id: string) {
-    try {
-      return await this.blogsService.get(id);
-    } catch (error) {
-      if (error instanceof BlogNotFoundServiceError) {
-        throw new NotFoundException('Blog not found');
-      }
-    }
+  async get(@Param() dto: IdDto) {
+    return await this.blogsService.get(dto.id);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
-    //TODO: add caching
-    try {
-      await this.blogsService.update(id, updateBlogDto);
-    } catch (error) {
-      if (error instanceof BlogNotFoundServiceError) {
-        throw new NotFoundException('Blog not found');
-      }
+  @Get(':id/image')
+  async getImage(@Param() dto: IdDto) {
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
     }
+
+    return this.blogsService.getImage(blog);
   }
 
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    try {
-      await this.blogsService.remove(id);
-    } catch (error) {
-      if (error instanceof BlogNotFoundServiceError) {
-        throw new NotFoundException('Blog not found');
-      }
+  async delete(@Param() dto: IdDto) {
+    const blog = await this.blogsService.get(dto.id);
+    if (!blog) {
+      throw new NotFoundException();
     }
+
+    return this.blogsService.softDelete(blog);
   }
 }
