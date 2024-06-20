@@ -1,15 +1,21 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogsModule } from './blogs/blogs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { CommonModule } from './common/common.module';
+import { WinstonModule } from 'nest-winston';
+import { loggerOptions } from './common/logger/logger.config';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { VersionMiddleware } from './common/middleware/version.middleware';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    WinstonModule.forRoot({ ...loggerOptions }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DATABASE_HOST,
@@ -21,8 +27,14 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: true,
     }),
     BlogsModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply(VersionMiddleware).forRoutes('*');
+  }
+}

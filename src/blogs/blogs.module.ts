@@ -6,9 +6,10 @@ import { BlogSchema } from './entities/blog.schema';
 import { BlogsRepository } from './blogs.repository';
 import { INTERFACE_TOKEN_BLOG_REPOSITORY } from './interfaces/blogs.interface.repository';
 import { INTERFACE_TOKEN_BLOG_SERVICE } from './interfaces/blogs.interface.service';
+import { CommonModule } from '@src/common/common.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BlogSchema])],
+  imports: [TypeOrmModule.forFeature([BlogSchema]), CommonModule],
   controllers: [BlogsController],
   providers: [
     { provide: INTERFACE_TOKEN_BLOG_SERVICE, useClass: BlogsService },
