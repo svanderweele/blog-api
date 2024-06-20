@@ -74,7 +74,7 @@ describe('BlogsController', () => {
       // Act
       const call = async () => {
         const file: any = {};
-        return await sut.uploadImage(faker.string.uuid(), file);
+        return await sut.uploadImage({ id: faker.string.uuid() }, file);
       };
 
       // Assert

@@ -1,9 +1,10 @@
 module.exports = {
   extends: 'nestjs',
-  rules:{
-    'no-console':'error'
-  }
-}
+  rules: {
+    'no-console': 'error',
+    '@typescript-eslint/no-unused-vars': 'error',
+  },
+};
 
 //
 // module.exports = {
