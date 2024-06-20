@@ -12,7 +12,9 @@ import {
   Patch,
   Post,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
+  Request,
 } from '@nestjs/common';
 import { IdDto } from '@src/common/id.dto';
 import {
@@ -26,11 +28,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ILogger } from '@src/common/logger/logger.interface';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
-
-// For now the system will only support one USER
-const USER_UUID = '06cec3d1-e9b7-45bd-bb57-dc0b980c6303';
+import { AuthGuard } from '@src/auth/guard/auth.guard';
+import { AuthenticatedRequest } from '@src/common/request';
 
 @Controller('blogs')
+@UseGuards(AuthGuard)
 export class BlogsController {
   constructor(
     @Inject(INTERFACE_TOKEN_BLOG_SERVICE)
@@ -40,12 +42,16 @@ export class BlogsController {
   ) {}
 
   @Post()
-  async create(@Body() dto: CreateBlogDto): Promise<Blog> {
+  async create(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreateBlogDto,
+  ): Promise<Blog> {
     this.logger.trace('[blogs.controller.create]', dto);
+
     return await this.blogsService.create({
       title: dto.title,
       content: dto.content,
-      userId: USER_UUID,
+      userId: req.user.sub,
     });
   }
 
@@ -59,6 +65,7 @@ export class BlogsController {
     }),
   )
   async uploadImage(
+    @Request() req: AuthenticatedRequest,
     @Param() dto: IdDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
@@ -81,7 +88,7 @@ export class BlogsController {
     });
     const path = file.filename;
 
-    const blog = await this.blogsService.get(dto.id);
+    const blog = await this.blogsService.get(dto.id, req.user.sub);
     if (!blog) {
       throw new NotFoundException();
     }
@@ -93,12 +100,17 @@ export class BlogsController {
 
   @Patch(':id')
   async update(
+    @Request() req: AuthenticatedRequest,
     @Param() dto: IdDto,
     @Body() body: UpdateBlogDto,
   ): Promise<Blog> {
     this.logger.trace('[blogs.controller.update]', { blogId: dto.id, body });
-    const blog = await this.blogsService.get(dto.id);
+    const blog = await this.blogsService.get(dto.id, req.user.sub);
     if (!blog) {
+      throw new NotFoundException();
+    }
+
+    if (blog.userId != req.user.sub) {
       throw new NotFoundException();
     }
 
@@ -109,9 +121,9 @@ export class BlogsController {
   }
 
   @Get()
-  async getAll() {
+  async getAll(@Request() req: AuthenticatedRequest) {
     this.logger.trace('[blogs.controller.getAll]');
-    const blogs = await this.blogsService.getAll();
+    const blogs = await this.blogsService.getAll(req.user.sub);
 
     if (blogs.length == 0) {
       throw new NotFoundException();
@@ -121,15 +133,15 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async get(@Param() dto: IdDto) {
+  async get(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
     this.logger.trace('[blogs.controller.get]', dto.id);
-    return await this.blogsService.get(dto.id);
+    return await this.blogsService.get(dto.id, req.user.sub);
   }
 
   @Get(':id/image')
-  async getImage(@Param() dto: IdDto) {
+  async getImage(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
     this.logger.trace('[blogs.controller.getImage]', dto.id);
-    const blog = await this.blogsService.get(dto.id);
+    const blog = await this.blogsService.get(dto.id, req.user.sub);
     if (!blog) {
       throw new NotFoundException();
     }
@@ -138,9 +150,9 @@ export class BlogsController {
   }
 
   @Delete(':id')
-  async delete(@Param() dto: IdDto) {
+  async delete(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
     this.logger.trace('[blogs.controller.delete]', dto.id);
-    const blog = await this.blogsService.get(dto.id);
+    const blog = await this.blogsService.get(dto.id, req.user.sub);
     if (!blog) {
       throw new NotFoundException();
     }

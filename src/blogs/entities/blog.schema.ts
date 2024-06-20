@@ -28,8 +28,4 @@ export const BlogSchema = new EntitySchema<Blog>({
       type: 'uuid',
     },
   },
-  relations: {
-    // TODO: Map relation to Author
-    // userId: {},
-  },
 });
