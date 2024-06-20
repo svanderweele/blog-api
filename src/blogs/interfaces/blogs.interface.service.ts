@@ -7,7 +7,6 @@ export interface IBlogService {
   /**
    * Creates a blog by the given payload
    * @param dto the dto of the blog
-   * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   create(dto: {
     title: string;
@@ -19,8 +18,6 @@ export interface IBlogService {
    * Updates a blog by the given payload
    * @param id the id of the blog we want to update
    * @param dto the dto of the blog
-   * @throws BlogNotFoundServiceError if no blog is found
-   * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   update(
     blog: Blog,
@@ -30,23 +27,18 @@ export interface IBlogService {
   /**
    * Gets a blog by the id provided
    * @param id the id of the blog
-   * @throws BlogNotFoundServiceError if no blog is found
-   * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   get(id: string): Promise<Blog>;
 
   getImage(blog: Blog): Promise<StreamableFile>;
   /**
    * Gets all blogs
-   * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   getAll(): Promise<Blog[]>;
 
   /**
    * Soft deletes a blog
    * @param id the id of the blog
-   * @throws BlogNotFoundServiceError if no blog is found
-   * @throws BlogUnexpectedServiceError if an unexpected error occurs
    */
   softDelete(blog: Blog): Promise<void>;
 }

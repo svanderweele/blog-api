@@ -6,7 +6,6 @@ export interface IBlogRepository {
   /**
    * Creates a blog by the given payload
    * @param dto the payload of the blog
-   * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
   create(dto: {
     title: string;
@@ -18,8 +17,6 @@ export interface IBlogRepository {
    * Updates a blog by the given payload
    * @param id the blog id
    * @param dto the payload of the blog
-   * @throws BlogNotFoundRepositoryError if blog is not found
-   * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
   update(
     id: string,
@@ -31,24 +28,19 @@ export interface IBlogRepository {
   ): Promise<Blog>;
 
   /**
-   * Gets a blog by the id provided
+   * Gets a blog by the id provided or null
    * @param id the id of the blog
-   * @throws BlogNotFoundRepositoryError if no blog is found
-   * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
   get(id: string): Promise<Blog | null>;
 
   /**
    * Gets all blogs
-   * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
   getAll(): Promise<Blog[]>;
 
   /**
    * Soft deletes a blog
    * @param id the id of the blog
-   * @throws BlogNotFoundRepositoryError if no blog is found
-   * @throws BlogUnexpectedRepositoryError if an unexpected error occurs
    */
   softDelete(blog: Blog): Promise<void>;
 }
