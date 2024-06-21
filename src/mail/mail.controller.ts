@@ -5,7 +5,9 @@ import {
   INTERFACE_TOKEN_LOGGER_SERVICE,
   LoggerService,
 } from '@src/common/logger/logger.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('mail')
 @Controller('mail')
 export class MailController {
   /**

@@ -30,7 +30,9 @@ import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.servic
 import { CustomRequest } from '@src/common/request';
 import { Roles } from '@src/auth/decorator/roles.decorator';
 import { Role } from '@src/auth/enums/role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('blogs')
 @Controller({
   version: '1',
   path: 'blogs',

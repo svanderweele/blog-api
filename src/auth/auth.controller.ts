@@ -16,8 +16,13 @@ import {
   INTERFACE_TOKEN_AUTH_SERVICE,
 } from './interfaces/auth.service.interface';
 import { Public } from './decorator/public.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+@ApiTags('auth')
+@Controller({
+  version: '1',
+  path: 'auth',
+})
 export class AuthController {
   constructor(
     @Inject(INTERFACE_TOKEN_AUTH_SERVICE)
