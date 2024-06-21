@@ -31,7 +31,10 @@ import { AuthenticatedRequest } from '@src/common/request';
 import { Roles } from '@src/auth/decorator/roles.decorator';
 import { Role } from '@src/auth/enums/role.enum';
 
-@Controller('blogs')
+@Controller({
+  version: '1',
+  path: 'blogs',
+})
 export class BlogsController {
   constructor(
     @Inject(INTERFACE_TOKEN_BLOG_SERVICE)
