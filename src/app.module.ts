@@ -1,6 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { BlogsModule } from './blogs/blogs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
@@ -25,6 +23,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
       rootPath: join(__dirname, '../..', 'client'),
     }),
     ConfigModule.forRoot({
+      envFilePath: ['.env.development', '.env'],
       isGlobal: true,
     }),
     WinstonModule.forRoot({ ...loggerOptions }),
@@ -44,9 +43,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
     AuthModule,
     MailModule,
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
