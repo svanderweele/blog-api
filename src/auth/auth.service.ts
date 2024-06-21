@@ -21,6 +21,10 @@ export class AuthService implements IAuthService {
     const { username, password } = request;
     const user = await this.userService.findOne(username);
 
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (isMatch === false) {

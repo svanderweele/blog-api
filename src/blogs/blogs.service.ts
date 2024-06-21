@@ -1,9 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  StreamableFile,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Blog } from './entities/blog.entity';
 import {
   IBlogRepository,
@@ -13,11 +8,10 @@ import {
   GetAllRequest,
   IBlogService,
 } from './interfaces/blogs.interface.service';
-import { createReadStream } from 'fs';
-import { join } from 'path';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
 import { ILogger } from '@src/common/logger/logger.interface';
-import * as fs from 'fs';
+import { INTERFACE_TOKEN_CACHE_APP } from '@src/common/cache/cache.module';
+import { IAppCacheService } from '@src/common/cache/interface/app.cache.service.interface';
 
 @Injectable()
 export class BlogsService implements IBlogService {
@@ -25,17 +19,34 @@ export class BlogsService implements IBlogService {
     @Inject(INTERFACE_TOKEN_BLOG_REPOSITORY) private repo: IBlogRepository,
     @Inject(INTERFACE_TOKEN_LOGGER_SERVICE)
     private readonly logger: ILogger,
+    @Inject(INTERFACE_TOKEN_CACHE_APP)
+    private readonly cacheService: IAppCacheService,
   ) {}
 
   async getAll(request: GetAllRequest): Promise<Blog[]> {
     this.logger.trace('[blogs.service.getAll]');
-    const blogs = await this.repo.getAll(request.userId);
-    return blogs;
+    return this.cacheService.getOrSet(
+      `${request.userId}-all-blogs`,
+      async () => {
+        return await this.repo.getAll(request.userId);
+      },
+      request.bustCache,
+    );
   }
 
-  async get(id: string, userId: string): Promise<Blog | null> {
+  async get(
+    id: string,
+    userId: string,
+    bustCache: boolean,
+  ): Promise<Blog | null> {
     this.logger.trace('[blogs.service.get]', id);
-    return await this.repo.get(id, userId);
+    return this.cacheService.getOrSet(
+      `blog-${id}`,
+      async () => {
+        return await this.repo.get(id, userId);
+      },
+      bustCache,
+    );
   }
 
   async create(dto: {
@@ -83,38 +94,5 @@ export class BlogsService implements IBlogService {
   async softDelete(blog: Blog): Promise<void> {
     this.logger.trace('[blogs.service.softDelete]', blog);
     await this.repo.softDelete(blog);
-  }
-
-  async getImage(blog: Blog): Promise<StreamableFile> {
-    try {
-      this.logger.trace('[blogs.service.getImage]', blog);
-      if (!blog.image) {
-        throw new NotFoundException();
-      }
-
-      const filePath = join(process.cwd(), 'client', blog.image);
-
-      const doesFileExist = fs.existsSync(filePath);
-
-      if (!doesFileExist) {
-        this.logger.error('[blogs.service.getImage] File does not exist ', {
-          blog,
-        });
-        throw new NotFoundException();
-      }
-
-      const stream = createReadStream(filePath);
-      return new StreamableFile(stream);
-    } catch (error) {
-      this.logger.error(
-        '[blogs.service.getImage] Failed to get blog image',
-        error,
-        {
-          blog,
-        },
-      );
-
-      throw error;
-    }
   }
 }

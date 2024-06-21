@@ -7,9 +7,10 @@ import { BlogsRepository } from './blogs.repository';
 import { INTERFACE_TOKEN_BLOG_REPOSITORY } from './interfaces/blogs.interface.repository';
 import { INTERFACE_TOKEN_BLOG_SERVICE } from './interfaces/blogs.interface.service';
 import { CommonModule } from '@src/common/common.module';
+import { CacheModule } from '@src/common/cache/cache.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([BlogSchema]), CommonModule],
+  imports: [TypeOrmModule.forFeature([BlogSchema]), CommonModule, CacheModule],
   controllers: [BlogsController],
   providers: [
     { provide: INTERFACE_TOKEN_BLOG_SERVICE, useClass: BlogsService },

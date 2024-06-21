@@ -27,7 +27,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ILogger } from '@src/common/logger/logger.interface';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
-import { AuthenticatedRequest } from '@src/common/request';
+import { CustomRequest } from '@src/common/request';
 import { Roles } from '@src/auth/decorator/roles.decorator';
 import { Role } from '@src/auth/enums/role.enum';
 
@@ -45,7 +45,7 @@ export class BlogsController {
 
   @Post()
   async create(
-    @Request() req: AuthenticatedRequest,
+    @Request() req: CustomRequest,
     @Body() dto: CreateBlogDto,
   ): Promise<Blog> {
     this.logger.trace('[blogs.controller.create]', dto);
@@ -67,7 +67,7 @@ export class BlogsController {
     }),
   )
   async uploadImage(
-    @Request() req: AuthenticatedRequest,
+    @Request() req: CustomRequest,
     @Param() dto: IdDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
@@ -90,7 +90,11 @@ export class BlogsController {
     });
     const path = file.filename;
 
-    const blog = await this.blogsService.get(dto.id, req.user.sub);
+    const blog = await this.blogsService.get(
+      dto.id,
+      req.user.sub,
+      req.shouldBustCache,
+    );
     if (!blog) {
       throw new NotFoundException();
     }
@@ -102,12 +106,16 @@ export class BlogsController {
 
   @Patch(':id')
   async update(
-    @Request() req: AuthenticatedRequest,
+    @Request() req: CustomRequest,
     @Param() dto: IdDto,
     @Body() body: UpdateBlogDto,
   ): Promise<Blog> {
     this.logger.trace('[blogs.controller.update]', { blogId: dto.id, body });
-    const blog = await this.blogsService.get(dto.id, req.user.sub);
+    const blog = await this.blogsService.get(
+      dto.id,
+      req.user.sub,
+      req.shouldBustCache,
+    );
     if (!blog) {
       throw new NotFoundException();
     }
@@ -124,9 +132,12 @@ export class BlogsController {
 
   @Get()
   @Roles(Role.User)
-  async getAll(@Request() req: AuthenticatedRequest) {
+  async getAll(@Request() req: CustomRequest) {
     this.logger.trace('[blogs.controller.getAll]');
-    const blogs = await this.blogsService.getAll({ userId: req.user.sub });
+    const blogs = await this.blogsService.getAll({
+      userId: req.user.sub,
+      bustCache: req.shouldBustCache,
+    });
 
     if (blogs.length == 0) {
       throw new NotFoundException();
@@ -137,9 +148,12 @@ export class BlogsController {
 
   @Get('admin')
   @Roles(Role.Admin)
-  async getAllAdmin() {
+  async getAllAdmin(@Request() req: CustomRequest) {
     this.logger.trace('[blogs.controller.getAllAdmin]');
-    const blogs = await this.blogsService.getAll({ userId: null });
+    const blogs = await this.blogsService.getAll({
+      userId: null,
+      bustCache: req.shouldBustCache,
+    });
 
     if (blogs.length == 0) {
       throw new NotFoundException();
@@ -149,26 +163,23 @@ export class BlogsController {
   }
 
   @Get(':id')
-  async get(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
+  async get(@Request() req: CustomRequest, @Param() dto: IdDto) {
     this.logger.trace('[blogs.controller.get]', dto.id);
-    return await this.blogsService.get(dto.id, req.user.sub);
-  }
-
-  @Get(':id/image')
-  async getImage(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
-    this.logger.trace('[blogs.controller.getImage]', dto.id);
-    const blog = await this.blogsService.get(dto.id, req.user.sub);
-    if (!blog) {
-      throw new NotFoundException();
-    }
-
-    return this.blogsService.getImage(blog);
+    return await this.blogsService.get(
+      dto.id,
+      req.user.sub,
+      req.shouldBustCache,
+    );
   }
 
   @Delete(':id')
-  async delete(@Request() req: AuthenticatedRequest, @Param() dto: IdDto) {
+  async delete(@Request() req: CustomRequest, @Param() dto: IdDto) {
     this.logger.trace('[blogs.controller.delete]', dto.id);
-    const blog = await this.blogsService.get(dto.id, req.user.sub);
+    const blog = await this.blogsService.get(
+      dto.id,
+      req.user.sub,
+      req.shouldBustCache,
+    );
     if (!blog) {
       throw new NotFoundException();
     }

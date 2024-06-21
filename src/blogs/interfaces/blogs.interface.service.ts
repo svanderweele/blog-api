@@ -1,4 +1,3 @@
-import { StreamableFile } from '@nestjs/common';
 import { Blog } from '../entities/blog.entity';
 
 export const INTERFACE_TOKEN_BLOG_SERVICE = 'IBlogService';
@@ -29,13 +28,8 @@ export interface IBlogService {
    * @param id the id of the blog
    * @param userId the user's id
    */
-  get(id: string, userId: string): Promise<Blog>;
+  get(id: string, userId: string, bustCache: boolean): Promise<Blog>;
 
-  /**
-   * Gets the image of a blog
-   * @param blog the blog
-   */
-  getImage(blog: Blog): Promise<StreamableFile>;
   /**
    * Gets all blogs
    * @param userId the user's id
@@ -51,4 +45,5 @@ export interface IBlogService {
 
 export interface GetAllRequest {
   userId: string | null;
+  bustCache: boolean;
 }
