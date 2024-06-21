@@ -4,6 +4,24 @@
 
 This project is a robust Blogging API built to deliver high performance and reliability. It includes a wide range of features, from authentication and authorization to caching and API versioning.
 
+## Quick Start
+
+Run the `docker-compose.yaml` to spin up the necessary external resources.
+
+```bash
+  docker-compose up -d
+```
+
+Once the docker containers are running then simply run the Nest.JS application using the following npm commands:
+
+```bash
+  npm install
+  npm run start:dev
+```
+
+SwaggerUI will provide you with the possible endpoints.
+
+
 ## Features
 
 - **Error Handling:** We have implemented robust error handling to avoid unexpected responses.
