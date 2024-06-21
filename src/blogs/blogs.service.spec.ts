@@ -7,6 +7,8 @@ import { faker } from '@faker-js/faker';
 import { Blog } from './entities/blog.entity';
 import { INTERFACE_TOKEN_BLOG_REPOSITORY } from './interfaces/blogs.interface.repository';
 import { NotFoundException } from '@nestjs/common';
+import { INTERFACE_TOKEN_CACHE_APP } from '@src/common/cache/cache.module';
+import { AppCacheService } from '@src/common/cache/app.cache.service';
 
 const createRandomBlogEntity = (): Blog => {
   return {
@@ -20,18 +22,16 @@ const createRandomBlogEntity = (): Blog => {
   };
 };
 
-const request: any = {
-  user: { sub: 'user', username: 'username' },
-};
-
 describe('BlogService', () => {
   let sut: BlogsService;
   let repository: jest.Mocked<BlogsRepository>;
+  let cache: jest.Mocked<AppCacheService>;
 
   beforeEach(async () => {
     const { unit, unitRef } = TestBed.create(BlogsService).compile();
     sut = unit;
     repository = unitRef.get(INTERFACE_TOKEN_BLOG_REPOSITORY);
+    cache = unitRef.get(INTERFACE_TOKEN_CACHE_APP);
   });
 
   it('should be defined', () => {
@@ -134,11 +134,11 @@ describe('BlogService', () => {
     it('gets all blogs', async () => {
       // Arrange
       const blogEntities = [createRandomBlogEntity()];
-      repository.getAll.mockResolvedValue(blogEntities);
+      cache.getOrSet.mockResolvedValue(blogEntities);
 
       // Act
       const call = async () => {
-        return await sut.getAll(request);
+        return await sut.getAll({ userId: 'some-user-id', bustCache: false });
       };
 
       // Assert
@@ -150,10 +150,10 @@ describe('BlogService', () => {
 
     it('should return a blog', async () => {
       // Arrange
-      repository.get.mockResolvedValue(entity);
+      cache.getOrSet.mockResolvedValue(entity);
       // Act
       const call = async () => {
-        return await sut.get(request, faker.string.uuid());
+        return await sut.get('blog-id', 'user-id', false);
       };
       // Assert
       await expect(call()).resolves.toStrictEqual(entity);
@@ -161,11 +161,11 @@ describe('BlogService', () => {
 
     it('should throw not found error', async () => {
       // Arrange
-      repository.get.mockRejectedValue(new NotFoundException());
+      cache.getOrSet.mockRejectedValue(new NotFoundException());
 
       // Act
       const call = async () => {
-        await sut.get(request, entity.id);
+        return await sut.get('blog-id', 'user-id', false);
       };
 
       // Assert
@@ -197,35 +197,6 @@ describe('BlogService', () => {
       // Act
       const call = async () => {
         await sut.softDelete(createRandomBlogEntity());
-      };
-
-      // Assert
-      await expect(call()).rejects.toThrow(NotFoundException);
-    });
-  });
-
-  describe('get image', () => {
-    it('should throw blog not found error', async () => {
-      // Arrange
-      repository.get.mockRejectedValue(new NotFoundException());
-
-      // Act
-      const call = async () => {
-        await sut.getImage(createRandomBlogEntity());
-      };
-
-      // Assert
-      await expect(call()).rejects.toThrow(NotFoundException);
-    });
-
-    it('should throw image not found error', async () => {
-      // Arrange
-      const entity = createRandomBlogEntity();
-      repository.get.mockResolvedValue(entity);
-
-      // Act
-      const call = async () => {
-        await sut.getImage(entity);
       };
 
       // Assert

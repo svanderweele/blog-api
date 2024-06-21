@@ -3,8 +3,9 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILogger } from '@src/common/logger/logger.interface';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
-import { IUserRepository } from './interfaces/user.interface.repository';
+import { IUserRepository } from './interfaces/user.repository.interface';
 import { User } from './entity/user.entity';
+import { Role } from '@src/auth/enums/role.enum';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -14,11 +15,16 @@ export class UserRepository implements IUserRepository {
     private readonly logger: ILogger,
   ) {}
 
-  async create(dto: { username: string; password: string }): Promise<User> {
+  async create(dto: {
+    username: string;
+    password: string;
+    roles: Role[];
+  }): Promise<User> {
     try {
       const entity = this.repo.create({
         username: dto.username,
         password: dto.password,
+        roles: dto.roles,
       });
       await this.repo.insert(entity);
       return this.repo.findOneOrFail({ where: { id: entity.id } });
@@ -37,7 +43,7 @@ export class UserRepository implements IUserRepository {
 
   async update(
     id: string,
-    dto: { username?: string; password?: string },
+    dto: { username?: string; password?: string; roles?: Role[] },
   ): Promise<User> {
     try {
       await this.repo.update(id, dto);

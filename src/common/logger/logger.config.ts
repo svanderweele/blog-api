@@ -6,6 +6,12 @@ export const loggerOptions: WinstonModuleOptions = {
     winston.format.json(),
     winston.format.timestamp(),
   ),
+  defaultMeta: {
+    service: 'blogs-api',
+    buildInfo: {
+      nodeVersion: process.version,
+    },
+  },
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({

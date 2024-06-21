@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserSchema } from './entity/user.schema';
-import { INTERFACE_TOKEN_USER_REPOSITORY } from '@src/user/interfaces/user.interface.repository';
 import { UserRepository } from '@src/user/user.repository';
 import { CommonModule } from '@src/common/common.module';
 import { INTERFACE_TOKEN_USER_SERVICE } from './interfaces/user.service.interface';
+import { INTERFACE_TOKEN_USER_REPOSITORY } from './interfaces/user.repository.interface';
 
 @Module({
   imports: [TypeOrmModule.forFeature([UserSchema]), CommonModule],

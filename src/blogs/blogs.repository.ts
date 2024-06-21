@@ -1,4 +1,4 @@
-import { EntityNotFoundError, Repository } from 'typeorm';
+import { EntityNotFoundError, FindManyOptions, Repository } from 'typeorm';
 import { Blog } from './entities/blog.entity';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -66,9 +66,17 @@ export class BlogsRepository implements IBlogRepository {
     }
   }
 
-  async getAll(userId: string): Promise<Blog[]> {
+  async getAll(userId: string | null): Promise<Blog[]> {
     try {
-      return await this.repo.find({ where: { userId }, withDeleted: true });
+      const queryOptions: FindManyOptions<Blog> = {
+        withDeleted: true,
+      };
+
+      if (userId) {
+        queryOptions.where = { userId };
+      }
+
+      return await this.repo.find(queryOptions);
     } catch (error) {
       this.logger.error(
         '[blogs.repository.getAll] Failed to get all blogs',

@@ -14,6 +14,10 @@ import { AuthModule } from './auth/auth.module';
 import { MailModule } from './mail/mail.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { BustCacheMiddleware } from './common/cache/middleware/bust-cache.middleware';
+import { APP_GUARD } from '@nestjs/core/constants';
+import { RolesGuard } from './auth/guard/role.guard';
+import { AuthGuard } from './auth/guard/auth.guard';
 
 @Module({
   imports: [
@@ -41,10 +45,21 @@ import { join } from 'path';
     MailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BustCacheMiddleware).forRoutes('*');
     consumer.apply(LoggerMiddleware).forRoutes('*');
     consumer.apply(VersionMiddleware).forRoutes('*');
   }

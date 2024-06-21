@@ -93,36 +93,6 @@ describe('BlogsController', () => {
     });
   });
 
-  describe('get blog image', () => {
-    it('should return 404', async () =>
-      // Arrange
-      {
-        service.getImage.mockRejectedValue(new NotFoundException());
-
-        // Act
-        const call = async () => {
-          return await sut.getImage(request, { id: faker.string.uuid() });
-        };
-
-        // Assert
-        await expect(call()).rejects.toThrow(NotFoundException);
-      });
-
-    it('should return image', async () => {
-      // Arrange
-      const blog = createRandomBlogEntity();
-      service.get.mockResolvedValue(blog);
-      const image: any = {};
-      service.getImage.mockResolvedValue(image);
-      // Act
-      const call = async () => {
-        return await sut.getImage(request, { id: faker.string.uuid() });
-      };
-      // Assert
-      await expect(call()).resolves.toStrictEqual(image);
-    });
-  });
-
   describe('getting all blogs', () => {
     it('should return 404', async () => {
       // Arrange
