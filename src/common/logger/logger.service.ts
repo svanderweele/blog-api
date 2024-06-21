@@ -9,33 +9,31 @@ export class LoggerService implements ILogger {
   constructor(@Inject(WINSTON_MODULE_NEST_PROVIDER) private logger: Logger) {}
 
   private context: any;
-  setContext(test: any) {
-    this.context = test;
+  setContext(context: any) {
+    this.context = context;
   }
 
-  trace(message: unknown, ...params: any) {
-    this.logger.debug(message, { ...params, ...this.context });
+  getLogBody(message: unknown, params: any) {
+    return { message, ...this.context, extraData: params };
   }
-  info(message: unknown, ...params: any[]) {
-    this.logger.log(message, { ...params, ...this.context });
-  }
-  warn(message: unknown, ...params: any[]) {
-    this.logger.warn(message, { ...params, ...this.context });
-  }
-  error(
-    message: unknown,
-    error: unknown,
 
-    ...params: any[]
-  ) {
-    this.logger.error(message, error, { ...params, ...this.context });
+  trace(message: unknown, params: any) {
+    this.logger.debug(this.getLogBody(message, params));
   }
-  fatal(
-    message: unknown,
-    error: unknown,
-
-    ...params: any[]
-  ) {
-    this.logger.fatal(message, error, { ...params, ...this.context });
+  info(message: unknown, params: any) {
+    this.logger.log(this.getLogBody(message, params));
+  }
+  warn(message: unknown, params: any) {
+    this.logger.warn(this.getLogBody(message, params));
+  }
+  error(message: unknown, error: unknown, params: any) {
+    this.logger.error({ ...this.getLogBody(message, params), error });
+  }
+  fatal(message: unknown, error: unknown, params: any) {
+    this.logger.error({
+      isFatalError: true,
+      ...this.getLogBody(message, params),
+      error,
+    });
   }
 }
