@@ -1,5 +1,6 @@
 import { Request } from 'express';
 
-export interface AuthenticatedRequest extends Request {
+export class CustomRequest extends Request {
   user: { sub: string; username: string };
+  shouldBustCache: boolean = false;
 }

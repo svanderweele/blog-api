@@ -11,6 +11,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { VersionMiddleware } from './common/middleware/version.middleware';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { BustCacheMiddleware } from './common/cache/middleware/bust-cache.middleware';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AuthModule } from './auth/auth.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(BustCacheMiddleware).forRoutes('*');
     consumer.apply(LoggerMiddleware).forRoutes('*');
     consumer.apply(VersionMiddleware).forRoutes('*');
   }
