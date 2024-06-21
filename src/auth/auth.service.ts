@@ -7,6 +7,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginRequest, LoginResponse } from './dto/auth.dto';
+import { Role } from './enums/role.enum';
+import { SessionUser } from '@src/common/request';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -25,7 +27,11 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException();
     }
 
-    const payload = { sub: user.id, username: user.username };
+    const payload: SessionUser = {
+      sub: user.id,
+      username: user.username,
+      roles: user.roles,
+    };
     const token = await this.jwtService.signAsync(payload);
     return { accessToken: token };
   }
@@ -40,7 +46,7 @@ export class AuthService implements IAuthService {
     const saltOrRounds = parseInt(process.env.SALT) ?? 10;
     const salt = bcrypt.genSaltSync(saltOrRounds);
     const hash = await bcrypt.hash(password, salt);
-    await this.userService.createUser(username, hash);
+    await this.userService.createUser(username, hash, [Role.Admin]);
     return true;
   }
 }

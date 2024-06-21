@@ -12,7 +12,6 @@ import {
   Patch,
   Post,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
   Request,
 } from '@nestjs/common';
@@ -28,11 +27,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ILogger } from '@src/common/logger/logger.interface';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
-import { AuthGuard } from '@src/auth/guard/auth.guard';
 import { AuthenticatedRequest } from '@src/common/request';
+import { Roles } from '@src/auth/decorator/roles.decorator';
+import { Role } from '@src/auth/enums/role.enum';
 
 @Controller('blogs')
-@UseGuards(AuthGuard)
 export class BlogsController {
   constructor(
     @Inject(INTERFACE_TOKEN_BLOG_SERVICE)
@@ -121,9 +120,23 @@ export class BlogsController {
   }
 
   @Get()
+  @Roles(Role.User)
   async getAll(@Request() req: AuthenticatedRequest) {
     this.logger.trace('[blogs.controller.getAll]');
-    const blogs = await this.blogsService.getAll(req.user.sub);
+    const blogs = await this.blogsService.getAll({ userId: req.user.sub });
+
+    if (blogs.length == 0) {
+      throw new NotFoundException();
+    }
+
+    return blogs;
+  }
+
+  @Get('admin')
+  @Roles(Role.Admin)
+  async getAllAdmin() {
+    this.logger.trace('[blogs.controller.getAllAdmin]');
+    const blogs = await this.blogsService.getAll({ userId: null });
 
     if (blogs.length == 0) {
       throw new NotFoundException();

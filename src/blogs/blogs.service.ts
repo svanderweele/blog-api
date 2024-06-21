@@ -9,7 +9,10 @@ import {
   IBlogRepository,
   INTERFACE_TOKEN_BLOG_REPOSITORY,
 } from './interfaces/blogs.interface.repository';
-import { IBlogService } from './interfaces/blogs.interface.service';
+import {
+  GetAllRequest,
+  IBlogService,
+} from './interfaces/blogs.interface.service';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
@@ -24,9 +27,9 @@ export class BlogsService implements IBlogService {
     private readonly logger: ILogger,
   ) {}
 
-  async getAll(userId: string): Promise<Blog[]> {
+  async getAll(request: GetAllRequest): Promise<Blog[]> {
     this.logger.trace('[blogs.service.getAll]');
-    const blogs = await this.repo.getAll(userId);
+    const blogs = await this.repo.getAll(request.userId);
     return blogs;
   }
 

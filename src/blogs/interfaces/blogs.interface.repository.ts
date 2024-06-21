@@ -38,7 +38,7 @@ export interface IBlogRepository {
    * Gets all blogs
    * @param userId the user's id
    */
-  getAll(userId: string): Promise<Blog[]>;
+  getAll(userId: string | null): Promise<Blog[]>;
 
   /**
    * Soft deletes a blog
