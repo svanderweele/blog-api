@@ -13,6 +13,9 @@ export const BlogSchema = new EntitySchema<Blog>({
     title: {
       type: 'text',
     },
+    subtitle: {
+      type: 'text',
+    },
     content: {
       type: 'text',
     },

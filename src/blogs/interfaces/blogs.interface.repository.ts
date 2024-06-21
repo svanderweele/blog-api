@@ -9,6 +9,7 @@ export interface IBlogRepository {
    */
   create(dto: {
     title: string;
+    subtitle: string;
     content: string;
     userId: string;
   }): Promise<Blog>;
@@ -22,6 +23,7 @@ export interface IBlogRepository {
     id: string,
     dto: {
       title?: string;
+      subtitle?: string;
       content?: string;
       image?: string;
     },

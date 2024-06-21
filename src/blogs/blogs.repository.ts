@@ -17,11 +17,13 @@ export class BlogsRepository implements IBlogRepository {
   async create(dto: {
     title: string;
     content: string;
+    subtitle: string;
     userId: string;
   }): Promise<Blog> {
     try {
       const entity = this.repo.create({
         title: dto.title,
+        subtitle: dto.subtitle,
         content: dto.content,
         userId: dto.userId,
       });

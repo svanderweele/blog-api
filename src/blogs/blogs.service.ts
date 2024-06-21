@@ -52,6 +52,7 @@ export class BlogsService implements IBlogService {
   async create(dto: {
     title: string;
     content: string;
+    subtitle: string;
     userId: string;
   }): Promise<Blog> {
     this.logger.trace('[blogs.service.create]', dto);
@@ -59,6 +60,11 @@ export class BlogsService implements IBlogService {
       this.logger.info('[blogs.service.create] Title was empty', dto);
       throw new Error('title cannot be empty');
     }
+    if (!dto.subtitle) {
+      this.logger.info('[blogs.service.create] Subtitle was empty', dto);
+      throw new Error('subtitle cannot be empty');
+    }
+
     if (!dto.content) {
       this.logger.info('[blogs.service.create] Content was empty', dto);
       throw new Error('content cannot be empty');
@@ -70,6 +76,7 @@ export class BlogsService implements IBlogService {
 
     return await this.repo.create({
       title: dto.title,
+      subtitle: dto.subtitle,
       content: dto.content,
       userId: dto.userId,
     });
@@ -79,6 +86,7 @@ export class BlogsService implements IBlogService {
     blog: Blog,
     dto: {
       title?: string;
+      subtitle?: string;
       content?: string;
       image?: string;
     },
@@ -86,6 +94,7 @@ export class BlogsService implements IBlogService {
     this.logger.trace('[blogs.service.update]', { blog, dto });
     return await this.repo.update(blog.id, {
       title: dto.title,
+      subtitle: dto.subtitle,
       content: dto.content,
       image: dto.image,
     });

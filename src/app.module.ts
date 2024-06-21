@@ -11,6 +11,9 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { VersionMiddleware } from './common/middleware/version.middleware';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
+import { MailModule } from './mail/mail.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { BustCacheMiddleware } from './common/cache/middleware/bust-cache.middleware';
 import { APP_GUARD } from '@nestjs/core/constants';
 import { RolesGuard } from './auth/guard/role.guard';
@@ -18,6 +21,9 @@ import { AuthGuard } from './auth/guard/auth.guard';
 
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '../..', 'client'),
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -36,6 +42,7 @@ import { AuthGuard } from './auth/guard/auth.guard';
     CommonModule,
     UserModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [

@@ -52,6 +52,7 @@ export class BlogsController {
 
     return await this.blogsService.create({
       title: dto.title,
+      subtitle: dto.subtitle,
       content: dto.content,
       userId: req.user.sub,
     });

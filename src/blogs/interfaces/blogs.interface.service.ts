@@ -9,6 +9,7 @@ export interface IBlogService {
    */
   create(dto: {
     title: string;
+    subtitle: string;
     content: string;
     userId: string;
   }): Promise<Blog>;
@@ -20,7 +21,12 @@ export interface IBlogService {
    */
   update(
     blog: Blog,
-    dto: { title?: string; content?: string; image?: string },
+    dto: {
+      title?: string;
+      subtitle?: string;
+      content?: string;
+      image?: string;
+    },
   ): Promise<Blog>;
 
   /**
