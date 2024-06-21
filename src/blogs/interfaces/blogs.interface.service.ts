@@ -34,11 +34,16 @@ export interface IBlogService {
    * Gets all blogs
    * @param userId the user's id
    */
-  getAll(userId: string, bustCache: boolean): Promise<Blog[]>;
+  getAll(request: GetAllRequest): Promise<Blog[]>;
 
   /**
    * Soft deletes a blog
    * @param blog the blog
    */
   softDelete(blog: Blog): Promise<void>;
+}
+
+export interface GetAllRequest {
+  userId: string | null;
+  bustCache: boolean;
 }

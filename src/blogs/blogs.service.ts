@@ -4,7 +4,10 @@ import {
   IBlogRepository,
   INTERFACE_TOKEN_BLOG_REPOSITORY,
 } from './interfaces/blogs.interface.repository';
-import { IBlogService } from './interfaces/blogs.interface.service';
+import {
+  GetAllRequest,
+  IBlogService,
+} from './interfaces/blogs.interface.service';
 import { INTERFACE_TOKEN_LOGGER_SERVICE } from '@src/common/logger/logger.service';
 import { ILogger } from '@src/common/logger/logger.interface';
 import { INTERFACE_TOKEN_CACHE_APP } from '@src/common/cache/cache.module';
@@ -20,14 +23,14 @@ export class BlogsService implements IBlogService {
     private readonly cacheService: IAppCacheService,
   ) {}
 
-  async getAll(userId: string, bustCache: boolean): Promise<Blog[]> {
+  async getAll(request: GetAllRequest): Promise<Blog[]> {
     this.logger.trace('[blogs.service.getAll]');
     return this.cacheService.getOrSet(
-      `${userId}-all-blogs`,
+      `${request.userId}-all-blogs`,
       async () => {
-        return await this.repo.getAll(userId);
+        return await this.repo.getAll(request.userId);
       },
-      bustCache,
+      request.bustCache,
     );
   }
 

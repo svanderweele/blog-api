@@ -15,6 +15,7 @@ import {
   IAuthService,
   INTERFACE_TOKEN_AUTH_SERVICE,
 } from './interfaces/auth.service.interface';
+import { Public } from './decorator/public.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -23,6 +24,7 @@ export class AuthController {
     private readonly authService: IAuthService,
   ) {}
 
+  @Public()
   @Post('login')
   async login(
     @Body() loginRequestDto: LoginRequestDto,
@@ -37,6 +39,7 @@ export class AuthController {
     return { sessionToken: response.accessToken };
   }
 
+  @Public()
   @Post('register')
   @HttpCode(200)
   async register(@Body() dto: RegisterRequestDto): Promise<void> {

@@ -21,10 +21,6 @@ const createRandomBlogEntity = (): Blog => {
   };
 };
 
-const request: any = {
-  user: { sub: 'user', username: 'username' },
-};
-
 describe('BlogService', () => {
   let sut: BlogsService;
   let repository: jest.Mocked<BlogsRepository>;
@@ -120,7 +116,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        return await sut.getAll(request, false);
+        return await sut.getAll({ userId: 'some-user-id', bustCache: false });
       };
 
       // Assert
@@ -135,7 +131,7 @@ describe('BlogService', () => {
       cache.getOrSet.mockResolvedValue(entity);
       // Act
       const call = async () => {
-        return await sut.get(request, faker.string.uuid(), false);
+        return await sut.get('blog-id', 'user-id', false);
       };
       // Assert
       await expect(call()).resolves.toStrictEqual(entity);
@@ -147,7 +143,7 @@ describe('BlogService', () => {
 
       // Act
       const call = async () => {
-        await sut.get(request, entity.id, false);
+        return await sut.get('blog-id', 'user-id', false);
       };
 
       // Assert

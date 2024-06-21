@@ -4,7 +4,8 @@ import { User } from './entity/user.entity';
 import {
   INTERFACE_TOKEN_USER_REPOSITORY,
   IUserRepository,
-} from './interfaces/user.interface.repository';
+} from './interfaces/user.repository.interface';
+import { Role } from '@src/auth/enums/role.enum';
 
 @Injectable()
 export class UserService implements IUserService {
@@ -17,13 +18,17 @@ export class UserService implements IUserService {
     return this.repository.get(username);
   }
 
-  async createUser(username: string, password: string): Promise<void> {
+  async createUser(
+    username: string,
+    password: string,
+    roles: Role[],
+  ): Promise<void> {
     const existingUser = await this.findOne(username);
 
     if (existingUser) {
       throw new Error('User already exists');
     }
 
-    await this.repository.create({ username, password });
+    await this.repository.create({ username, password, roles });
   }
 }
