@@ -41,9 +41,7 @@ We have several enhancements in the pipeline:
 
 - Integrate with Grafana
 - Improve documentation (https://docs.nestjs.com/recipes/documentation)
-- Add Swagger Docs
 - Swap to using MongoDB with custom queries
-- Learn more about database performance
 - Deploy via Serverless
     - Lambda
     - PostgresDB (DocumentDB)
